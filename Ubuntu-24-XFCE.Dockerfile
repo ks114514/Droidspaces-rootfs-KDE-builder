@@ -2,8 +2,8 @@ ARG TARGETPLATFORM
 FROM ubuntu:24.04 AS customizer
 
 #######################################################
-ARG BUILD_KDE
-ARG BUILD_KDE_plus
+ARG BUILD_XFCE
+ARG BUILD_XFCE_plus
 ARG PulseAudio
 ARG ENABLE_zh_tz_ARG
 ARG ENABLE_binfmt_ARG
@@ -42,12 +42,12 @@ RUN apt-get update && \
     procps \
     # 核心内核模块支持
     kmod tzdata && \
-    ############################################## KDE支持 ################################################
-    # 最小化KDE
+    ############################################## XFCE支持 ################################################
+    # 最小化XFCE
     # 解除底层系统对中文等翻译文件(.mo)的剔除规则，防止安装桌面时丢包
     sed -i 's|^path-exclude=/usr/share/locale/\*/LC_MESSAGES/\*.mo|#&|' /etc/dpkg/dpkg.cfg.d/excludes || true && \
-    # 精简KDE
-    if [ "$BUILD_KDE" = "conc" ]; then \
+    # 精简XFCE
+    if [ "$BUILD_XFCE" = "conc" ]; then \
         apt-get install -y --no-install-recommends \
             xfce4 desktop-base xfce4-terminal xfce4-session xscreensaver xfce4-goodies \
             xubuntu-wallpapers xfce4-taskmanager mousepad galculator nemo-fileroller ristretto xfce4-screenshooter \
@@ -57,6 +57,7 @@ RUN apt-get update && \
             greybird-gtk-theme fonts-dejavu-core fonts-liberation fonts-liberation2 fonts-noto-core fonts-noto-ui-core \
             fonts-ubuntu thunar thunar-volman thunar-archive-plugin thunar-media-tags-plugin gvfs gvfs-backends gvfs-fuse \
             x11-xserver-utils x11-utils xclip xsel xfwm4 xfconf zenity notification-daemon xdg-user-dirs \
+            onts-droid-fallback ttf-wqy-zenhei fonts-arphic-ukai fonts-arphic-uming; \
     fi && \
     ######################################################################################################
     #输入法 fcitx5 (可选)
@@ -162,7 +163,7 @@ EOF
     fi
 
     echo 'export XDG_RUNTIME_DIR=/run/user/$(id -u)' >> /home/${USERNAME}/.bashrc
-    if [ "$BUILD_KDE" = "min" ] || [ "$BUILD_KDE" = "conc" ] ; then
+    if [ "$BUILD_XFCE" = "min" ] || [ "$BUILD_XFCE" = "conc" ] ; then
     mkdir -p /home/${USERNAME}/.config
     cat <<'EOF' > /home/${USERNAME}/.config/kwinrc
 [Compositing]
@@ -170,7 +171,7 @@ Enabled=false
 EOF
     fi
     chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}
-    if [ "$BUILD_KDE_plus" = "true" ] ; then
+    if [ "$BUILD_XFCE_plus" = "true" ] ; then
     cat <<EOF > /etc/systemd/system/plasma-x11.service
 [Unit]
 Description=Start Plasma X11
